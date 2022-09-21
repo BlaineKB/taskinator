@@ -1,15 +1,15 @@
+var taskIdCounter = 0;
+
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
 var pageContentEl = document.querySelector("#page-content");
 var tasksInProgressEl = document.querySelector("#tasks-in-progress");
 var tasksCompletedEl = document.querySelector("#tasks-completed");
-var taskIdCounter = 0;
-var tasks = [];
 
+var tasks = [];
 
 var taskFormHandler = function(event) {
     event.preventDefault();
-
     var taskNameInput = document.querySelector("input[name='task-name']").value;
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
 
@@ -60,10 +60,22 @@ var createTaskEl = function(taskDataObj) {
     var taskActionsEl = createTaskActions(taskIdCounter);
     listItemEl.appendChild(taskActionsEl);
 
-    tasksToDoEl.appendChild(listItemEl);
-
-    // add entire list item to list
-    tasksToDoEl.appendChild(listItemEl);
+    switch (taskDataObj.status) {
+        case "to do":
+          taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 0;
+          tasksToDoEl.append(listItemEl);
+          break;
+        case "in progress":
+          taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 1;
+          tasksInProgressEl.append(listItemEl);
+          break;
+        case "completed":
+          taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 2;
+          tasksCompletedEl.append(listItemEl);
+          break;
+        default:
+          console.log("Something went wrong!");
+      }
 
     taskDataObj.id = taskIdCounter;
 
@@ -119,6 +131,8 @@ var createTaskActions = function(taskId) {
 };
 
 var taskStatusChangeHandler = function(event) {
+    console.log(event.target.value);
+
     // get the task item's id
     var taskId = event.target.getAttribute("data-task-id");
 
@@ -220,10 +234,10 @@ var completeEditTask = function(taskName, taskType, taskId) {
 
     alert ("Task Updated!");
 
-    saveTasks();
-
     formEl.removeAttribute("data-task-id");
     document.querySelector("#save-task").textContent = "Add Task";
+
+    saveTasks();
 };
 
 var saveTasks = function() {
@@ -252,8 +266,9 @@ var loadTasks = function() {
 
 };
 
-loadTasks();
 
 formEl.addEventListener("submit", taskFormHandler);
 pageContentEl.addEventListener("click", taskButtonHandler); 
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+
+loadTasks();
